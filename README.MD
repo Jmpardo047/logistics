@@ -1,4 +1,4 @@
-![logisticadrawio (2)](logisticadrawio (2).jpg)
+![logisticadrawio (2)](https://github.com/Jmpardo047/logistics/blob/main/logisticadrawio%20(2).jpg)
 
 **Caso de Uso 1: Registrar un Nuevo País** 
 
