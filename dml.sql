@@ -22,6 +22,13 @@ INSERT INTO trackings (location,time_date,packagestatesid,packageid) VALUES ('ca
 INSERT INTO vehicles (plate,modelid,branchid,driverid,status) VALUES ('ABS946','1','1','91297969','1');
 INSERT INTO vehiclesroutes VALUES ('1','1');
 
+SELECT c.id AS clientid, sh.id AS shippingid, sh.shippingdate, pa.id AS packageid, pa.content AS packagecontent, re.id AS receiverid, re.name AS receivername
+FROM shippings AS sh
+INNER JOIN clients AS c ON c.id = sh.clientid
+INNER JOIN packages AS pa ON pa.id = sh.packageid
+INNER JOIN receivers AS re ON re.id = sh.receiverid
+WHERE c.id = '1097783634';
+
 UPDATE trackings 
 SET packagestatesid = '2' 
 WHERE id = '1';
@@ -42,14 +49,13 @@ INNER JOIN driversroutes AS dr ON dr.routeid = sh.routeid
 INNER JOIN drivers AS d ON d.id = dr.driverid
 INNER JOIN branches AS br ON br.id = ro.branchid;
 
-
-SELECT c.id AS clientid, sh.id AS shippingid, sh.shippingdate, pa.id AS packageid, pa.content AS packagecontent, re.id AS receiverid, re.name AS receivername
+SELECT c.id AS clientid, sh.id AS shippingid, sh.shippingdate, ps.name AS status, tr.time_date AS timedate
 FROM shippings AS sh
 INNER JOIN clients AS c ON c.id = sh.clientid
 INNER JOIN packages AS pa ON pa.id = sh.packageid
-INNER JOIN receivers AS re ON re.id = sh.receiverid
+INNER JOIN trackings AS tr ON tr.packageid = pa.id
+INNER JOIN packagestates AS ps ON ps.id = tr.packagestatesid
 WHERE c.id = '1097783634';
-
 
 SELECT d.id AS driverid, d.name AS drivername, v.plate AS vehicleplate, m.name AS modelname, b.name AS branchname 
 FROM drivers AS d
@@ -81,7 +87,8 @@ ORDER BY sh.id, ps.id;
 SELECT p.id AS packageid, p.weight, p.measures, p.content, p.declaredvalue, p.servicetype, tr.id AS trackingid, tr.location, tr.time_date, ps.name AS state
 FROM packages AS p
 INNER JOIN trackings AS tr ON tr.packageid = p.id
-INNER JOIN packagestates As ps ON ps.id = tr.packagestatesid;
+INNER JOIN packagestates As ps ON ps.id = tr.packagestatesid
+WHERE p.id = '1';
 
 
 SELECT p.id AS packageid, p.content, sh.id AS shippingid, sh.shippingdate
@@ -110,6 +117,14 @@ INNER JOIN clients AS c ON c.id = sh.clientid
 WHERE shippingdate BETWEEN '2024-06-14 19:00:00' AND '2024-06-15 03:00:00'
 ORDER BY shippingdate;
 
+SELECT d.id, d.name, s.name AS state
+FROM drivers AS d
+INNER JOIN states AS s ON s.id = d.stateid
+WHERE s.name = 'Disponible';
+
+SELECT p.id, p.content, p.declaredvalue
+FROM packages AS p
+WHERE p.declaredvalue BETWEEN '75.00' AND '400.00';
 
 SELECT ro.id AS routeid, ro.description AS routedescription, a.id AS assistantid, a.name AS assistantname
 FROM routes AS ro
