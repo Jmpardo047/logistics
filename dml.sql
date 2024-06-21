@@ -43,12 +43,11 @@ INNER JOIN drivers AS d ON d.id = dr.driverid
 INNER JOIN branches AS br ON br.id = ro.branchid;
 
 
-SELECT c.id AS clientid, sh.id AS shippingid, sh.shippingdate, ps.name AS status, tr.time_date AS timedate
+SELECT c.id AS clientid, sh.id AS shippingid, sh.shippingdate, pa.id AS packageid, pa.content AS packagecontent, re.id AS receiverid, re.name AS receivername
 FROM shippings AS sh
 INNER JOIN clients AS c ON c.id = sh.clientid
 INNER JOIN packages AS pa ON pa.id = sh.packageid
-INNER JOIN trackings AS tr ON tr.packageid = pa.id
-INNER JOIN packagestates AS ps ON ps.id = tr.packagestatesid
+INNER JOIN receivers AS re ON re.id = sh.receiverid
 WHERE c.id = '1097783634';
 
 
@@ -69,6 +68,7 @@ LEFT JOIN assitantsroutes AS ar ON ro.id = ar.routeid
 LEFT JOIN assistants AS a ON ar.assistantid = a.id
 ORDER BY ro.id, a.id;
 
+
 SELECT p.id AS packageid, p.content, br.id AS branchid, br.name AS branchname, ps.name AS packagestate
 FROM packages AS p
 INNER JOIN trackings AS tr ON tr.packageid = p.id
@@ -77,9 +77,64 @@ INNER JOIN branches AS br ON br.id = sh.branchid
 INNER JOIN packagestates AS ps ON ps.id = tr.packagestatesid
 ORDER BY sh.id, ps.id;
 
+
 SELECT p.id AS packageid, p.weight, p.measures, p.content, p.declaredvalue, p.servicetype, tr.id AS trackingid, tr.location, tr.time_date, ps.name AS state
 FROM packages AS p
 INNER JOIN trackings AS tr ON tr.packageid = p.id
 INNER JOIN packagestates As ps ON ps.id = tr.packagestatesid;
 
 
+SELECT p.id AS packageid, p.content, sh.id AS shippingid, sh.shippingdate
+FROM packages AS p
+INNER JOIN shippings AS sh ON sh.packageid = p.id
+WHERE sh.shippingdate BETWEEN '2024-06-10 10:00:00' AND '2024-06-20 10:00:00';
+
+
+SELECT p.id AS packageid, p.content, tr.id AS trackingid, ps.name AS state
+FROM packages AS p 
+INNER JOIN trackings AS tr ON tr.packageid = p.id
+INNER JOIN packagestates AS ps ON ps.id = tr.packagestatesid
+WHERE ps.name IN ('entregado','Pending','Cancelled');
+
+
+SELECT p.id AS packageid, p.content, tr.id AS trackingid, ps.name AS state
+FROM packages AS p 
+INNER JOIN trackings AS tr ON tr.packageid = p.id
+INNER JOIN packagestates AS ps ON ps.id = tr.packagestatesid
+WHERE ps.name NOT IN ('entregado','Pending','Cancelled','Damaged','Transferred');
+
+
+SELECT c.id AS clientid, c.name AS clientname, sh.id AS shippingid, sh.shippingdate
+FROM shippings AS sh
+INNER JOIN clients AS c ON c.id = sh.clientid   
+WHERE shippingdate BETWEEN '2024-06-14 19:00:00' AND '2024-06-15 03:00:00'
+ORDER BY shippingdate;
+
+
+SELECT ro.id AS routeid, ro.description AS routedescription, a.id AS assistantid, a.name AS assistantname
+FROM routes AS ro
+LEFT JOIN assitantsroutes AS ar ON ro.id = ar.routeid
+LEFT JOIN assistants AS a ON ar.assistantid = a.id
+WHERE ro.id IN ('1','2')
+ORDER BY ro.id, a.id;
+
+
+SELECT sh.id As shippingid, sh.clientid, sh.packageid,  sh.shippingdate, sh.receiverid, ci.name AS destinycity
+FROM shippings AS sh
+INNER JOIN receivers AS r ON r.id = sh.receiverid
+INNER JOIN cities AS ci ON ci.id = r.cityid
+WHERE ci.id NOT IN ('CT001','CT002','CT003');
+
+
+SELECT tr.id AS trackingid, p.id AS packageid, tr.time_date AS trackingdate
+FROM trackings AS tr
+INNER JOIN packages AS p ON tr.packageid = p.id
+WHERE tr.time_date BETWEEN '2024-06-14 17:00:00' AND '2024-06-15 03:00:00'
+ORDER BY tr.time_date;
+
+
+SELECT c.id AS clientid, c.name AS clientname, sh.id AS shippingid, p.id AS packageid, p.content AS packagecontent, p.servicetype
+FROM shippings AS sh
+INNER JOIN clients AS c ON c.id = sh.clientid
+INNER JOIN packages AS p on p.id = sh.packageid
+WHERE p.servicetype IN ('Standard','Overnight');
